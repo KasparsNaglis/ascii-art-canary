@@ -1,10 +1,11 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useMemo } from "react";
 
 const CHARS =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*+=-:;!?/\\|(){}[]<>";
 
 const DEFAULTS = {
   bg: [0x11, 0x3d, 0x38],
+  shadow: [0x11, 0x3d, 0x38],
   highlight: [0xf4, 0xf2, 0x7b],
   hoverRadius: 120,
   pushForce: 40,
@@ -21,13 +22,13 @@ export default function AsciiArt({ data, className, style, ...overrides }) {
   const mouseRef = useRef({ x: -9999, y: -9999 });
   const stateRef = useRef(null);
 
-  const opts = { ...DEFAULTS, ...overrides };
+  const opts = useMemo(() => ({ ...DEFAULTS, ...overrides }), [JSON.stringify(overrides)]);
   const { cols, rows, cellWidth: CW, cellHeight: CH, cells } = data;
   const W = cols * CW;
   const H = rows * CH;
 
   // Initialize per-cell animation state once
-  if (!stateRef.current || stateRef.current.length !== cells.length) {
+  if (!stateRef.current || stateRef.current.chars.length !== cells.length) {
     stateRef.current = {
       offX: new Float32Array(cells.length),
       offY: new Float32Array(cells.length),
@@ -55,7 +56,7 @@ export default function AsciiArt({ data, className, style, ...overrides }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    const { bg, highlight, hoverRadius: RADIUS, pushForce: FORCE } = opts;
+    const { bg, shadow, highlight, hoverRadius: RADIUS, pushForce: FORCE } = opts;
     const state = stateRef.current;
     let raf;
 
@@ -110,9 +111,13 @@ export default function AsciiArt({ data, className, style, ...overrides }) {
             state.offX[idx] ** 2 + state.offY[idx] ** 2
           );
           const glow = Math.min(1, pushDist / FORCE);
-          const r = Math.round(lerp(cell[1], highlight[0], glow * 0.5));
-          const g = Math.round(lerp(cell[2], highlight[1], glow * 0.5));
-          const b = Math.round(lerp(cell[3], highlight[2], glow * 0.5));
+          const rawT = cell[1];
+          const baseR = lerp(shadow[0], highlight[0], rawT);
+          const baseG = lerp(shadow[1], highlight[1], rawT);
+          const baseB = lerp(shadow[2], highlight[2], rawT);
+          const r = Math.round(lerp(baseR, highlight[0], glow * 0.5));
+          const g = Math.round(lerp(baseG, highlight[1], glow * 0.5));
+          const b = Math.round(lerp(baseB, highlight[2], glow * 0.5));
 
           ctx.fillStyle = `rgb(${r},${g},${b})`;
           ctx.fillText(state.chars[idx], drawX, drawY);
@@ -124,7 +129,7 @@ export default function AsciiArt({ data, className, style, ...overrides }) {
 
     draw();
     return () => cancelAnimationFrame(raf);
-  }, [data, opts.bg, opts.highlight, opts.hoverRadius, opts.pushForce]);
+  }, [data, opts]);
 
   return (
     <canvas
@@ -132,9 +137,11 @@ export default function AsciiArt({ data, className, style, ...overrides }) {
       width={W}
       height={H}
       className={className}
-      style={{ maxWidth: "100%", maxHeight: "100vh", ...style }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      style={{ maxWidth: "100%", maxHeight: "100vh", touchAction: "none", ...style }}
+      onPointerMove={handleMouseMove}
+      onPointerLeave={handleMouseLeave}
+      role="img"
+      aria-label="Interactive ASCII art"
     />
   );
 }
