@@ -7,14 +7,14 @@ from PIL import Image, ImageOps
 import random
 import json
 
-BIRD_PATH = "../cc-birdie.png"
-DEPTH_PATH = "../cc-birdie-map-2.png"
-OUTPUT = "grid-data.json"
+BIRD_PATH = "cc-birdie.png"
+DEPTH_PATH = "cc-birdie-map-2.png"
+OUTPUT = "data/grid-data.json"
 
 HIGHLIGHT = (0xF4, 0xF2, 0x7B)
 SHADOW = (0x11, 0x3D, 0x38)
 
-CHAR_SET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*+=-:;!?/\\|(){}[]<>"
+CHAR_SET = "ATGCatgc"
 
 CELL_W = 8
 CELL_H = 12
@@ -56,10 +56,8 @@ for row in range(rows):
         depth_pixels = list(depth_region.getdata())
         avg_depth = sum(depth_pixels) / len(depth_pixels)
         t = avg_depth / 255.0
-        color = lerp_color(SHADOW, HIGHLIGHT, t)
-
         char = random.choice(CHAR_SET)
-        cells.append([char, color[0], color[1], color[2]])
+        cells.append([char, round(t, 3)])
 
 output = {
     "cols": cols,

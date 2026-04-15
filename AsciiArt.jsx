@@ -1,7 +1,6 @@
 import { useRef, useEffect, useCallback, useMemo } from "react";
 
-const CHARS =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*+=-:;!?/\\|(){}[]<>";
+const CHARS = "ATGCatgc";
 
 const DEFAULTS = {
   bg: [0x11, 0x3d, 0x38],
