@@ -86,7 +86,7 @@
 const CHARS = "ATGCatgc";
 
 function initAsciiCanvas(canvasId, grid, config) {
-  const { cols, rows, cw, ch, bg, shadow, highlight, radius = 120, force = 40, gammaSlider, gammaVal, contrastSlider, contrastVal, sizeMode = false, minFont = 2, maxFont = 12 } = config;
+  const { cols, rows, cw, ch, bg, shadow, highlight, radius = 120, force = 40, gammaSlider, gammaVal, contrastSlider, contrastVal, sizeMode = false, minFont = 2, maxFont = 12, fontPx = 10 } = config;
   const canvas = document.getElementById(canvasId);
   const W = cols * cw;
   const H = rows * ch;
@@ -149,7 +149,7 @@ function initAsciiCanvas(canvasId, grid, config) {
     if (!isVisible) return;
     ctx.fillStyle = `rgb(${bg[0]},${bg[1]},${bg[2]})`;
     ctx.fillRect(0, 0, W, H);
-    if (!sizeMode) ctx.font = '10px monospace';
+    if (!sizeMode) ctx.font = `${fontPx}px monospace`;
     ctx.textBaseline = 'top';
 
     // Update ripples
@@ -298,6 +298,7 @@ Promise.all([
     bg: [0x11, 0x3D, 0x38],
     shadow: [0x11, 0x3D, 0x38],
     highlight: [0xF4, 0xF2, 0x7B],
+    fontPx: 9,
     gammaSlider: document.getElementById('feather2-gamma'),
     gammaVal: document.getElementById('feather2-gamma-val'),
     contrastSlider: document.getElementById('feather2-contrast'),
